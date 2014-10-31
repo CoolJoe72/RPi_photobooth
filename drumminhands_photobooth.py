@@ -27,6 +27,7 @@ led1_pin = 15 # LED 1
 led2_pin = 19 # LED 2
 led3_pin = 21 # LED 3
 led4_pin = 23 # LED 4
+flash_pin = 13 # LED Flash Relay
 button1_pin = 22 # pin for the big red button
 button2_pin = 18 # pin for button to shutdown the pi
 button3_pin = 16 # pin for button to end the program, but not shutdown the pi
@@ -44,12 +45,12 @@ user_name = 'username' # change to your gmail username
 password = 'secretpasswordhere' # change to your gmail password
 test_server = 'www.google.com'
 
-w = 800 # width of screen in pixels
-h = 480 # height of screen in pixels
-transform_x = 640 # how wide to scale the jpg when replaying
-transfrom_y = 480 # how high to scale the jpg when replaying
-offset_x = 80 # how far off to left corner to display photos
-offset_y = 0 # how far off to left corner to display photos
+w = 1280 # width of screen in pixels
+h = 720 # height of screen in pixels
+img_w = 960 # how wide to scale the jpg when replaying
+img_h = 720 # how high to scale the jpg when replaying
+offset_x = (w - img_w) / 2 # how far off to left corner to display photos
+offset_y = (h - img_h) / 2 # how far off to left corner to display photos
 replay_delay = 1 # how much to wait in-between showing pics on-screen after taking
 replay_cycles = 4 # how many times to show each photo on-screen after taking
 
@@ -61,9 +62,11 @@ GPIO.setup(led1_pin,GPIO.OUT) # LED 1
 GPIO.setup(led2_pin,GPIO.OUT) # LED 2
 GPIO.setup(led3_pin,GPIO.OUT) # LED 3
 GPIO.setup(led4_pin,GPIO.OUT) # LED 4
+GPIO.setup(flash_pin,GPIO.OUT) # LED Flash Relay
 GPIO.setup(button1_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP) # falling edge detection on button 1
 GPIO.setup(button2_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP) # falling edge detection on button 2
 GPIO.setup(button3_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP) # falling edge detection on button 3
+GPIO.output(flash_pin,False);
 GPIO.output(led1_pin,False);
 GPIO.output(led2_pin,False);
 GPIO.output(led3_pin,False);
@@ -137,7 +140,7 @@ def start_photobooth():
 	################################# Begin Step 1 ################################# 
 	print "Get Ready" 
 	camera = picamera.PiCamera()
-	camera.resolution = (500, 375) #use a smaller size to process faster, and tumblr will only take up to 500 pixels wide for animated gifs
+	camera.resolution = (img_w, img_h) #use a smaller size to process faster. Tumblr's blog displays up to 500px wide but images can be larger.
 	camera.vflip = True
 	camera.hflip = True
 	camera.saturation = -100
