@@ -58,19 +58,14 @@ replay_cycles = 4 # how many times to show each photo on-screen after taking
 ### Other Config ###
 ####################
 GPIO.setmode(GPIO.BOARD)
-GPIO.setup(led1_pin,GPIO.OUT) # LED 1
-GPIO.setup(led2_pin,GPIO.OUT) # LED 2
-GPIO.setup(led3_pin,GPIO.OUT) # LED 3
-GPIO.setup(led4_pin,GPIO.OUT) # LED 4
-GPIO.setup(flash_pin,GPIO.OUT) # LED Flash Relay
+GPIO.setup(led1_pin,GPIO.OUT, initial=0) # LED 1
+GPIO.setup(led2_pin,GPIO.OUT, initial=0) # LED 2
+GPIO.setup(led3_pin,GPIO.OUT, initial=0) # LED 3
+GPIO.setup(led4_pin,GPIO.OUT, initial=0) # LED 4
+GPIO.setup(flash_pin,GPIO.OUT, initial=0) # LED Flash Relay
 GPIO.setup(button1_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP) # falling edge detection on button 1
 GPIO.setup(button2_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP) # falling edge detection on button 2
 GPIO.setup(button3_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP) # falling edge detection on button 3
-GPIO.output(flash_pin,False);
-GPIO.output(led1_pin,False);
-GPIO.output(led2_pin,False);
-GPIO.output(led3_pin,False);
-GPIO.output(led4_pin,False); #for some reason the pin turns on at the beginning of the program. why?????????????????????????????????
 
 #################
 ### Functions ###
@@ -94,6 +89,7 @@ def exit_photobooth(channel):
     print "Photo booth app ended. RPi still running" 
     GPIO.output(led1_pin,True);
     time.sleep(3)
+    GPIO.cleanup()
     sys.exit()
     
 def is_connected():
@@ -130,11 +126,11 @@ def display_pics(jpg_group):
 		for i in range(1, total_pics+1): #show each pic
 			filename = file_path + jpg_group + "-0" + str(i) + ".jpg"
 			img=pygame.image.load(filename) 
-			img = pygame.transform.scale(img,(transform_x,transfrom_y))
+			#img = pygame.transform.scale(img,(img_w,ing_h)) # image should not need to be scaled
 			screen.blit(img,(offset_x,offset_y))
 			pygame.display.flip() # update the display
 			time.sleep(replay_delay) # pause 
-			
+
 # define the photo taking function for when the big button is pressed 
 def start_photobooth(): 
 	################################# Begin Step 1 ################################# 
