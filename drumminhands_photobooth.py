@@ -151,7 +151,9 @@ def start_photobooth():
 	try: #take the photos
 		for i, filename in enumerate(camera.capture_continuous(file_path + now + '-' + '{counter:02d}.jpg')):
 			GPIO.output(led2_pin,True) #turn on the LED
+			GPIO.output(flash_pin,True)
 			print(filename)
+			GPIO.output(flash_pin,False)
 			sleep(0.25) #pause the LED on for just a bit
 			GPIO.output(led2_pin,False) #turn off the LED
 			sleep(capture_delay) # pause in-between shots
