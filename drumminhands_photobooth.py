@@ -96,6 +96,7 @@ def exit_photobooth(channel):
     led1_on
     time.sleep(3)
     GPIO.cleanup()
+    pygame.quit()
     sys.exit()
     
 def is_connected():
