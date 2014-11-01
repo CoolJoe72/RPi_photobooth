@@ -157,10 +157,15 @@ def start_photobooth():
 	now = time.strftime("%Y%m%d%H%M%S") #get the current date and time for the start of the filename
 	try: #take the photos
 		for i, filename in enumerate(camera.capture_continuous(file_path + now + '-' + '{counter:02d}.jpg')):
+<<<<<<< HEAD
 			led2_on #turn on the LED
 			flash_on
 			print(filename)
 			flash_off
+=======
+			GPIO.output(led2_pin,True) #turn on the LED
+			print(filename)
+>>>>>>> parent of 07f427d... added flash
 			sleep(0.25) #pause the LED on for just a bit
 			led2_off #turn off the LED
 			sleep(capture_delay) # pause in-between shots
