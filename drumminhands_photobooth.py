@@ -71,7 +71,7 @@ led2_on, led2_off = GPIO.output(led2_pin,True), GPIO.output(led2_pin,False)
 led3_on, led3_off = GPIO.output(led3_pin,True), GPIO.output(led3_pin,False)
 led4_on, led4_off = GPIO.output(led4_pin,True), GPIO.output(led4_pin,False)
 flash_on, flash_off = GPIO.output(flash_pin,True), GPIO.output(flash_pin,False)
- 
+
 
 #################
 ### Functions ###
@@ -82,8 +82,8 @@ def cleanup():
   GPIO.cleanup()
 atexit.register(cleanup)
 
-def shut_it_down(channel):  
-    print "Shutting down..." 
+def shut_it_down(channel):
+    print "Shutting down..."
     led1_on
     led2_on
     led3_on
@@ -92,13 +92,13 @@ def shut_it_down(channel):
     os.system("sudo halt")
 
 def exit_photobooth(channel):
-    print "Photo booth app ended. RPi still running" 
+    print "Photo booth app ended. RPi still running"
     led1_on
     time.sleep(3)
     GPIO.cleanup()
     pygame.quit()
     sys.exit()
-    
+
 def is_connected():
   try:
     # see if we can resolve the host name -- tells us if there is
@@ -110,38 +110,38 @@ def is_connected():
     return True
   except:
      pass
-  return False    
+  return False
 
 def display_pics(jpg_group):
-    # this section is an unbelievable nasty hack - for some reason Pygame
-    # needs a keyboardinterrupt to initialise in some limited circs (second time running)
-    class Alarm(Exception):
-        pass
-    def alarm_handler(signum, frame):
-        raise Alarm
-    signal(SIGALRM, alarm_handler)
-    alarm(3)
-    try:
-        pygame.init()
-        screen = pygame.display.set_mode((w,h),pygame.FULLSCREEN) 
-        alarm(0)
-    except Alarm:
-        raise KeyboardInterrupt
-    pygame.display.set_caption('Photo Booth Pics')
-    pygame.mouse.set_visible(False) #hide the mouse cursor	
-    for i in range(0, replay_cycles): #show pics a few times
+	# this section is an unbelievable nasty hack - for some reason Pygame
+	# needs a keyboardinterrupt to initialise in some limited circs (second time running)
+	class Alarm(Exception):
+		pass
+	def alarm_handler(signum, frame):
+		raise Alarm
+	signal(SIGALRM, alarm_handler)
+	alarm(3)
+	try:
+		pygame.init()
+		screen = pygame.display.set_mode((w,h),pygame.FULLSCREEN)
+		alarm(0)
+	except Alarm:
+		raise KeyboardInterrupt
+	pygame.display.set_caption('Photo Booth Pics')
+	pygame.mouse.set_visible(False) #hide the mouse cursor
+	for i in range(0, replay_cycles): #show pics a few times
 		for i in range(1, total_pics+1): #show each pic
 			filename = file_path + jpg_group + "-0" + str(i) + ".jpg"
-			img=pygame.image.load(filename) 
+			img=pygame.image.load(filename)
 			#img = pygame.transform.scale(img,(img_w,ing_h)) # image should not need to be scaled
 			screen.blit(img,(offset_x,offset_y))
 			pygame.display.flip() # update the display
-			time.sleep(replay_delay) # pause 
+			time.sleep(replay_delay) # pause
 
-# define the photo taking function for when the big button is pressed 
-def start_photobooth(): 
-	################################# Begin Step 1 ################################# 
-	print "Get Ready" 
+# define the photo taking function for when the big button is pressed
+def start_photobooth():
+	################################# Begin Step 1 #################################
+	print "Get Ready"
 	camera = picamera.PiCamera()
 	camera.resolution = (img_w, img_h) #use a smaller size to process faster. Tumblr's blog displays up to 500px wide but images can be larger.
 	camera.vflip = True
@@ -150,10 +150,10 @@ def start_photobooth():
 	camera.start_preview()
 	i=1 #iterate the blink of the light in prep, also gives a little time for the camera to warm up
 	while i < prep_delay :
-	  led1_on; sleep(.5) 
+	  led1_on; sleep(.5)
 	  led1_off; sleep(.5); i+=1
 	################################# Begin Step 2 #################################
-	print "Taking pics" 
+	print "Taking pics"
 	now = time.strftime("%Y%m%d%H%M%S") #get the current date and time for the start of the filename
 	try: #take the photos
 		for i, filename in enumerate(camera.capture_continuous(file_path + now + '-' + '{counter:02d}.jpg')):
@@ -170,13 +170,13 @@ def start_photobooth():
 		camera.stop_preview()
 		camera.close()
 	########################### Begin Step 3 #################################
-	print "Creating an animated gif" 
+	print "Creating an animated gif"
 	led3_on #turn on the LED
-	graphicsmagick = "gm convert -delay " + str(gif_delay) + " " + file_path + now + "*.jpg " + file_path + now + ".gif" 
+	graphicsmagick = "gm convert -delay " + str(gif_delay) + " " + file_path + now + "*.jpg " + file_path + now + ".gif"
 	os.system(graphicsmagick) #make the .gif
-	print "Uploading to tumblr. Please check " + tumblr_blog + " soon." 
+	print "Uploading to tumblr. Please check " + tumblr_blog + " soon."
 	connected = is_connected() #check to see if you have an internet connection
-	while connected: 
+	while connected:
 		try:
 			msg = MIMEMultipart()
 			msg['Subject'] = now
@@ -220,17 +220,17 @@ def start_photobooth():
 ### Main Program ###
 ####################
 
-# when a falling edge is detected on button2_pin and button3_pin, regardless of whatever   
-# else is happening in the program, their function will be run   
-GPIO.add_event_detect(button2_pin, GPIO.FALLING, callback=shut_it_down, bouncetime=300) 
-GPIO.add_event_detect(button3_pin, GPIO.FALLING, callback=exit_photobooth, bouncetime=300)  
+# when a falling edge is detected on button2_pin and button3_pin, regardless of whatever
+# else is happening in the program, their function will be run
+GPIO.add_event_detect(button2_pin, GPIO.FALLING, callback=shut_it_down, bouncetime=300)
+GPIO.add_event_detect(button3_pin, GPIO.FALLING, callback=exit_photobooth, bouncetime=300)
 
 # delete files in folder on startup
 files = glob.glob(file_path + '*')
 for f in files:
     os.remove(f)
 
-print "Photo booth app running..." 
+print "Photo booth app running..."
 led1_on #light up the lights to show the app is running at the beginning
 led2_on
 led3_on
