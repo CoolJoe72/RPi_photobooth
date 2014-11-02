@@ -100,7 +100,7 @@ def is_connected():
     # connect to the host -- tells us if the host is actually
     # reachable
     s = socket.create_connection((host, 80), 2)
-    return True
+    return False
   except:
      pass
   return False    
